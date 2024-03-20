@@ -1,0 +1,7 @@
+
+##############################################################
+#	file2.gen 10/03/2024 23:25:25    messages
+##############################################################
+Symbolic generation file : /usr/local/robotran/users/MECA2802/upload/file2.gen
+Project : /usr/local/robotran/users/MECA2802/upload/upload.mbs
+F7 - Link Forces (1D)

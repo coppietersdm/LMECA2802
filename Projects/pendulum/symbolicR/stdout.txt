@@ -1,0 +1,7 @@
+
+##############################################################
+#	file6.gen 15/03/2024 17:11:52    messages
+##############################################################
+Symbolic generation file : /usr/local/robotran/users/MECA2802/upload/file6.gen
+Project : /usr/local/robotran/users/MECA2802/upload/upload.mbs
+F27 - Link Forces (3D)

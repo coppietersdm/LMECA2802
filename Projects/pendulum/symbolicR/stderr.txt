@@ -1,0 +1,32 @@
+
+##############################################################
+#	file6.gen 15/03/2024 17:11:52    errors
+##############################################################
+git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
+
+
+ ERROR : The link(1D or 3D) menus require the presence of link(s) (1D or 3D) in the MBS 
+
+
+##############################################################
+#	file1b.gen 15/03/2024 17:11:52    errors
+##############################################################
+git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
+
+
+	Elimination of the superfluous equations.....................
+
+
+		Maximum simultaneous symbolic expressions :  585
+
+		Maximum number of allocated Kbytes :  27
+
+
+	The symbolic equations have been generated 
+	in the directory: /usr/local/robotran/users/MECA2802/upload/
+
+
+ 		*** Generation symbolique reussie ! ***
+
+
+
