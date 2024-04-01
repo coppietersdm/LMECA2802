@@ -105,8 +105,9 @@ class mbs():
             c[i.id-1] = i.psi @ i.Fc + i.phi @ i.Lc
             for j in self.bodies:
                 M[i.id-1][j.id-1] = i.psi @ i.Fm[j.id-1] + i.phi @ i.Lm[j.id-1]
+                M[j.id-1][i.id-1] = M[i.id-1][j.id-1]
         Q = np.zeros(len(self.bodies))
-        #Q[1] = - 10*self.bodies[1].q[0] -1*self.bodies[1].q[1]
+        Q[1] = - 10*self.bodies[1].q[0] #-1*self.bodies[1].q[1]
         qdd = np.linalg.solve(M,-c+Q)
         for body in self.bodies:
             body.q[2] = qdd[body.id-1]
@@ -142,9 +143,7 @@ class mbs():
         
       
 class body():
-    
     N = 0
-    
     def __init__(self, inbody, joint, m=0, I=np.zeros((3,3)), dii=np.zeros(3), dhi = np.zeros(3), q0=np.zeros(3)):
         # ---------------------------------------------------------------------------------------------
         # body constants
@@ -223,9 +222,9 @@ class body():
 MBS = mbs()
 
 MBS.add_body(MBS.base,"R2", m=1, I=I2, dii=np.array([0,0,-1]), q0 = np.array([pi/2,0,0]))
-MBS.add_body(MBS.bodies[-1],"R2", m=1, I=I2, dii=np.array([0,0,-1]), dhi=np.array([0,0,-2]), q0=np.array([0.1,0,0]))
-# MBS.add_body(MBS.bodies[-1],"R2", m=1, I=I2, dii=np.array([0,0,-1]), dhi=np.array([0,0,-2]))
-# MBS.add_body(MBS.bodies[-1],"T1", m=1, I=I2, dii=np.array([0,0,-1]), dhi=np.array([0,0,-2]), q0=np.array([-0.5,0,0]))
+MBS.add_body(MBS.bodies[-1],"T3", m=1, I=I2, dii=np.array([0,0,-1]), dhi=np.array([0,0,-2]), q0=np.array([0.1,0,0]))
+MBS.add_body(MBS.bodies[-1],"R2", m=1, I=I2, dii=np.array([0,0,-1]), dhi=np.array([0,0,-2]))
+MBS.add_body(MBS.bodies[-1],"R2", m=1, I=I2, dii=np.array([0,0,-1]), dhi=np.array([0,0,-2]), q0=np.array([-0.5,0,0]))
 # MBS.add_body(MBS.bodies[-1],"R2", m=1, I=I2, dii=np.array([0,0,-1]), dhi=np.array([0,0,-2]))
 # MBS.add_body(MBS.bodies[-1],"T1", m=1, I=I2, dii=np.array([0,0,-1]), dhi=np.array([0,0,-2]))
 
@@ -240,7 +239,7 @@ def animate(i):
     plt.xlim(-10,10)
     plt.ylim(-10,10)
 
-ani = FuncAnimation(plt.gcf(), animate, interval=1)
+ani = FuncAnimation(plt.gcf(), animate, interval=10)
 plt.axis('equal')
 plt.show()
 
