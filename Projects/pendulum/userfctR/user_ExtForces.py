@@ -71,12 +71,7 @@ def user_ExtForces(PxF, RxF, VxF, OMxF, AxF, OMPxF, mbs_data, tsim, ixF):
     # if PxF[1]>xlim:
     #     Fx = (PxF[1]-xlim)*kwall
 
-    F1_id = mbs_data.extforce_id["LateralBumpstop"]
 
-    if ixF == F1_id:
-        gap = 0.3
-        if PxF[1] > gap:
-            Fx = -10000*(PxF[1]-gap)
         
     # Concatenating force, torque and force application point to returned array.
     # This must not be modified.

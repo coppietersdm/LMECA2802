@@ -25,12 +25,13 @@ class mbs():
         self.bodies = []
         self.base = body(None, "T1")
         self.q = None
+        self.t = None
     
     def read_q(self):
         self.q = np.loadtxt('dirdyn_q.res')
     
-    def add_body(self, inbody, joint, m=0, I=0, dii=np.zeros(3), dhi = np.zeros(3), q0=np.zeros(3)):
-        self.bodies.append(body(inbody, joint, m=m, I=I, dii=dii, dhi=dhi, q0=q0))
+    def add_body(self, inbody, joint, m=0, I=0, dii=np.zeros(3), dhi = np.zeros(3), q0=np.zeros(3), Q=lambda t,q,qd: 0):
+        self.bodies.append(body(inbody, joint, m=m, I=I, dii=dii, dhi=dhi, q0=q0, Q=Q))
     
     def compute_q_dependent_variables(self):
         for body in self.bodies:
@@ -97,7 +98,7 @@ class mbs():
                 i.Fm[k] = sum(map(lambda j:j.Rhi @ j.Fm[k], i.children)) + i.Wm[k]
                 i.Lm[k] = sum(map(lambda j:j.Rhi @ j.Lm[k] + tilde(j.dzhi)@j.Rhi @ j.Fm[k], i.children)) + tilde(i.dzii)@i.Wm[k] + i.I@i.Om[k]
     
-    def second_derivative(self):
+    def second_derivative(self,t):
         self.compute_q_dependent_variables()
         self.forward_kinematics()
         self.backward_dynamics()
@@ -109,63 +110,37 @@ class mbs():
             for j in self.bodies:
                 M[i.id-1][j.id-1] = i.psi @ i.Fm[j.id-1] + i.phi @ i.Lm[j.id-1]
                 M[j.id-1][i.id-1] = M[i.id-1][j.id-1]
-        Q = np.zeros(len(self.bodies))
-        Q[1] = - 10*self.bodies[1].q[0] #-1*self.bodies[1].q[1]
+        Q = np.array([body.Q(t,body.q[0],body.q[1]) for body in self.bodies])
         qdd = np.linalg.solve(M,-c+Q)
         for body in self.bodies:
             body.q[2] = qdd[body.id-1]
             
-    def update(self, dt):
-        q = self.get_q()
-        qd = self.get_qd()
-        
-        self.second_derivative()
-        k1 = self.get_qd()
-        k1d = self.get_qdd()
-        self.set_q(q + k1*dt/2)
-        self.set_qd(qd + k1d*dt/2)
-        
-        self.second_derivative()
-        k2 = self.get_qd()
-        k2d = self.get_qdd()
-        self.set_q(q + k2*dt/2)
-        self.set_qd(qd + k2d*dt/2)
-        
-        self.second_derivative()
-        k3 = self.get_qd()
-        k3d = self.get_qdd()
-        self.set_q(q + k3*dt)
-        self.set_qd(qd + k3d*dt)
-        
-        self.second_derivative()
-        k4 = self.get_qd()
-        k4d = self.get_qdd()
-        
-        self.set_q(q + (k1+2*k2+2*k3+k4)*dt/6)
-        self.set_qd(qd + (k1d+2*k2d+2*k3d+k4d)*dt/6)
-        
     def integrate(self, t, dt):
         y0 = np.array(list(self.get_q()) + list(self.get_qd()))
-        def derivative(y):
+        def derivative(t,y):
             self.set_q(y[:len(self.bodies)])
             self.set_qd(y[len(self.bodies):2*len(self.bodies)])
-            self.second_derivative()
+            self.second_derivative(t)
             return np.array(list(self.get_qd()) + list(self.get_qdd()))
-        
-        sol = solve_ivp(fun=lambda t,y: derivative(y), t_span=(0,t), y0=y0, t_eval=np.linspace(0,t,int(t/dt)))
-        self.q = sol.y[:len(self.bodies)].T
-        
+        self.t = np.linspace(0.0,t,int(t*1000+1))
+        sol = solve_ivp(fun=lambda t,y: derivative(t,y), t_span=(0,t), y0=y0, t_eval=self.t, method = 'RK45')
+        self.q = np.zeros((len(self.t), len(self.bodies)+1))
+        self.q.T[1:] = sol.y[:len(self.bodies)]
+        self.q.T[0] = self.t
         np.savetxt('dirdyn_q.res', self.q)
-
+        
+                
 class body():
     N = 0
-    def __init__(self, inbody, joint, m=0, I=np.zeros((3,3)), dii=np.zeros(3), dhi = np.zeros(3), q0=np.zeros(3)):
+    def __init__(self, inbody, joint, m=0.0, I=np.zeros((3,3), dtype=float), dii=np.zeros(3,dtype=float), dhi = np.zeros(3,dtype=float), q0=np.zeros(3,dtype=float), Q=lambda t,q,qd:0.0):
         # ---------------------------------------------------------------------------------------------
         # body constants
         # ---------------------------------------------------------------------------------------------
         self.m = m; self.I = I
         self.dii = dii; self.dhi = dhi
 
+        self.Q = Q
+        
         self.inbody = inbody
         self.id = body.N; body.N += 1
         
@@ -182,17 +157,17 @@ class body():
         self.q = q0
 
         self.Oi, self.Oi_prime, self.Gi = (np.zeros(3),np.zeros(3),np.zeros(3))
-        self.R0i = np.eye(3)
+        self.R0i = np.eye(3, dtype=float)
         self.z, self.dzhi, self.dzii = (np.zeros(3),np.zeros(3),np.zeros(3))
-        self.Rhi = np.eye(3)
+        self.Rhi = np.eye(3, dtype=float)
         
         # ---------------------------------------------------------------------------------------------
         # kinematics
         # ---------------------------------------------------------------------------------------------
-        self.omega = np.zeros(3)
-        self.omegad_c = np.zeros(3)
+        self.omega = np.zeros(3, dtype=float)
+        self.omegad_c = np.zeros(3, dtype=float)
         self.alpha_c = -g
-        self.beta_c = np.zeros((3,3))
+        self.beta_c = np.zeros((3,3), dtype=float)
         
         self.Om = None
         self.Am = None
@@ -200,17 +175,17 @@ class body():
         # ---------------------------------------------------------------------------------------------
         # dynamics
         # ---------------------------------------------------------------------------------------------        
-        self.Wc = np.zeros(3)
-        self.Fc = np.zeros(3)
-        self.Lc = np.zeros(3)
+        self.Wc = np.zeros(3, dtype=float)
+        self.Fc = np.zeros(3, dtype=float)
+        self.Lc = np.zeros(3, dtype=float)
         
         self.Wm = None
         self.Fm = None
         self.Lm = None
          
         #external forces and torques
-        self.Fext = np.zeros(3)
-        self.Lext = np.zeros(3)
+        self.Fext = np.zeros(3, dtype=float)
+        self.Lext = np.zeros(3, dtype=float)
         
     def compute_q_dependent_variables(self):        
         self.z          = self.q[0]*self.psi

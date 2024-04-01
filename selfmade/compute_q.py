@@ -1,7 +1,11 @@
 from MBS_design import *
 
-MBS.integrate(20.0, 0.001)
-t = np.linspace(0,len(MBS.q)/1000, len(MBS.q))
-plt.plot(t, MBS.q.T[0])
-plt.plot(t, MBS.q.T[1])
+dt = 1e-3
+MBS.integrate(0.1, dt)
+
+for i in range(1,len(MBS.q.T)):
+    plt.plot(MBS.t, MBS.q.T[i], label = 'q['+ str(i) + ']')
+print(MBS.t)
+plt.grid(True)
+plt.legend()
 plt.show()

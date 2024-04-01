@@ -32,17 +32,7 @@ def user_cons_hJ(h, Jac, mbs_data, tsim):
     None
     """
 
-    # define pitch value and retrieve joints ID
-    p = 20e-3
-    idT3 = mbs_data.joint_id["T3_slider"]
-    idR3 = mbs_data.joint_id["R3_slider"]
-
-    # define the value of the constraint
-    h[1] = p*mbs_data.q[idR3]-2.*np.pi*mbs_data.q[idT3]
-
-    # define the value of the jacobian matrix
-    Jac[1,idR3] = p
-    Jac[1,idT3] = -2*np.pi    
+       
     
     # Example: Compute the expression of h and Jac then assign the values.
     # h[1] = mbs_data.q[1]-mbs_data.q[2]*mbs_data.q[2]

@@ -10,11 +10,11 @@
 #
 #	http://www.robotran.be 
 #
-#	==> Generation Date: Fri Mar 15 17:11:52 2024
+#	==> Generation Date: Mon Apr  1 14:00:13 2024
 #
 #	==> Project name: pendulum
 #
-#	==> Number of joints: 5
+#	==> Number of joints: 3
 #
 #	==> Function: F1 - Recursive Direct Dynamics of tree-like MBS
 #
@@ -31,88 +31,70 @@ def dirdyna(M, c, s, tsim):
 
     S1 = sin(q[1])
     C1 = cos(q[1])
-    S2 = sin(q[2])
-    C2 = cos(q[2])
-    S4 = sin(q[4])
-    C4 = cos(q[4])
-    S5 = sin(q[5])
-    C5 = cos(q[5])
+    S3 = sin(q[3])
+    C3 = cos(q[3])
+ 
+# Augmented Joint Position Vectors
+
+    Dz23 = q[2]+s.dpt[3,1]
  
 # Forward Kinematics
 
     BS91 = -qd[1]*qd[1]
     AF11 = s.g[3]*S1
     AF31 = -s.g[3]*C1
-    OM12 = qd[1]*S2
-    OM22 = qd[1]*C2
-    OA12 = qd[1]*qd[2]*C2
-    OA22 = -qd[1]*qd[2]*S2
-    BS32 = qd[2]*OM12
-    BS62 = qd[2]*OM22
-    BS92 = -OM12*OM12-OM22*OM22
-    BEF32 = BS32+OA22
-    BEF62 = BS62-OA12
-    AF12 = AF11*C2
-    AF22 = -AF11*S2
-    AF32 = AF31+BS91*s.dpt[3,3]
-    AM12_1 = s.dpt[3,3]*C2
-    AM22_1 = -s.dpt[3,3]*S2
-    AF13 = AF12+q[3]*BEF32+(2.0)*qd[3]*OM22
-    AF23 = AF22+q[3]*BEF62-(2.0)*qd[3]*OM12
-    AF33 = AF32+q[3]*BS92
-    AM13_1 = AM12_1+q[3]*C2
-    AM23_1 = AM22_1-q[3]*S2
-    BS94 = -qd[4]*qd[4]
-    AF14 = s.g[3]*S4
-    AF34 = -s.g[3]*C4
-    OM25 = qd[4]+qd[5]
-    BS95 = -OM25*OM25
-    AF15 = AF14*C5-S5*(AF34+BS94*s.dpt[3,6])
-    AF35 = AF14*S5+C5*(AF34+BS94*s.dpt[3,6])
-    AM15_4 = s.dpt[3,6]*C5
-    AM35_4 = s.dpt[3,6]*S5
+    BS92 = -qd[1]*qd[1]
+    AF12 = AF11+(2.0)*qd[1]*qd[2]
+    AF32 = AF31+BS91*Dz23
+    OM23 = qd[1]+qd[3]
+    BS93 = -OM23*OM23
+    AF13 = AF12*C3-AF32*S3
+    AF33 = AF12*S3+AF32*C3
+    AM13_1 = Dz23*C3
+    AM33_1 = Dz23*S3
  
 # Backward Dynamics
 
-    FA15 = -s.frc[1,5]+s.m[5]*AF15
-    FA35 = -s.frc[3,5]+s.m[5]*(AF35+BS95*s.l[3,5])
-    CF25 = -s.trq[2,5]+FA15*s.l[3,5]
-    FB15_4 = s.m[5]*(AM15_4+s.l[3,5])
-    FB35_4 = s.m[5]*AM35_4
-    CM25_4 = s.In[5,5]+FB15_4*s.l[3,5]
-    FB15_5 = s.m[5]*s.l[3,5]
-    CM25_5 = s.In[5,5]+FB15_5*s.l[3,5]
-    FA14 = -s.frc[1,4]+s.m[4]*AF14
-    CF24 = -s.trq[2,4]+CF25+FA14*s.l[3,4]+s.dpt[3,6]*(FA15*C5+FA35*S5)
-    FB14_4 = s.m[4]*s.l[3,4]
-    CM24_4 = s.In[5,4]+CM25_4+FB14_4*s.l[3,4]+s.dpt[3,6]*(FB15_4*C5+FB35_4*S5)
     FA13 = -s.frc[1,3]+s.m[3]*AF13
-    FA23 = -s.frc[2,3]+s.m[3]*AF23
-    FA33 = -s.frc[3,3]+s.m[3]*AF33
-    FB13_1 = s.m[3]*AM13_1
-    FB23_1 = s.m[3]*AM23_1
-    CF12 = -s.trq[1,3]-q[3]*FA23
-    CF22 = -s.trq[2,3]+q[3]*FA13
-    CM12_1 = -q[3]*FB23_1
-    CM22_1 = q[3]*FB13_1
+    FA33 = -s.frc[3,3]+s.m[3]*(AF33+BS93*s.l[3,3])
+    CF23 = -s.trq[2,3]+FA13*s.l[3,3]
+    FB13_1 = s.m[3]*(AM13_1+s.l[3,3])
+    FB33_1 = s.m[3]*AM33_1
+    CM23_1 = s.In[5,3]+FB13_1*s.l[3,3]
+    FB13_2 = -s.m[3]*S3
+    FB33_2 = s.m[3]*C3
+    CM23_2 = FB13_2*s.l[3,3]
+    FB13_3 = s.m[3]*s.l[3,3]
+    CM23_3 = s.In[5,3]+FB13_3*s.l[3,3]
+    FA12 = -s.frc[1,2]+s.m[2]*AF12
+    FA32 = -s.frc[3,2]+s.m[2]*(AF32+BS92*s.l[3,2])
+    FF12 = FA12+FA13*C3+FA33*S3
+    FF32 = FA32-FA13*S3+FA33*C3
+    CF22 = -s.trq[2,2]+CF23+FA12*s.l[3,2]
+    FB12_1 = s.m[2]*(s.l[3,2]+Dz23)
+    FM12_1 = FB12_1+FB13_1*C3+FB33_1*S3
+    FM32_1 = -FB13_1*S3+FB33_1*C3
+    CM22_1 = s.In[5,2]+CM23_1+FB12_1*s.l[3,2]
+    FM32_2 = s.m[2]-FB13_2*S3+FB33_2*C3
     FA11 = -s.frc[1,1]+s.m[1]*AF11
-    CF21 = -s.trq[2,1]+CF12*S2+CF22*C2+FA11*s.l[3,1]+s.dpt[3,3]*(FA13*C2-FA23*S2)
+    CF21 = -s.trq[2,1]+CF22+FA11*s.l[3,1]+FF12*Dz23
     FB11_1 = s.m[1]*s.l[3,1]
-    CM21_1 = s.In[5,1]+CM12_1*S2+CM22_1*C2+FB11_1*s.l[3,1]+s.dpt[3,3]*(FB13_1*C2-FB23_1*S2)
+    CM21_1 = s.In[5,1]+CM22_1+FB11_1*s.l[3,1]+FM12_1*Dz23
  
 # Symbolic model output
 
     c[1] = CF21
-    c[2] = -s.trq[3,3]
-    c[3] = FA33
-    c[4] = CF24
-    c[5] = CF25
+    c[2] = FF32
+    c[3] = CF23
     M[1,1] = CM21_1
-    M[3,3] = s.m[3]
-    M[4,4] = CM24_4
-    M[4,5] = CM25_4
-    M[5,4] = CM25_4
-    M[5,5] = CM25_5
+    M[1,2] = FM32_1
+    M[1,3] = CM23_1
+    M[2,1] = FM32_1
+    M[2,2] = FM32_2
+    M[2,3] = CM23_2
+    M[3,1] = CM23_1
+    M[3,2] = CM23_2
+    M[3,3] = CM23_3
 
 # Number of continuation lines = 0
 

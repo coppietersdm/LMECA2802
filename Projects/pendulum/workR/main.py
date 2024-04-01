@@ -51,7 +51,7 @@ mbs_part.run()
 # =============================================================================
 mbs_data.process = 3
 mbs_dirdyn = Robotran.MbsDirdyn(mbs_data)
-mbs_dirdyn.set_options(dt0=1e-3, tf=10.0, save2file=1)
+mbs_dirdyn.set_options(dt0=1e-3, tf=5.0, save2file=1)
 results = mbs_dirdyn.run()
 
 # %%===========================================================================
@@ -67,8 +67,10 @@ fig = plt.figure(num='Example of plot')
 axis = fig.gca()
 
 # Plotting data's
-axis.plot(results.q[:, 0], results.q[:, 2], label='q[2]')
 axis.plot(results.q[:, 0], results.q[:, 1], label='q[1]')
+axis.plot(results.q[:, 0], results.q[:, 2], label='q[2]')
+axis.plot(results.q[:, 0], results.q[:, 3], label='q[3]')
+
 
 axis.legend()
 # Figure enhancement

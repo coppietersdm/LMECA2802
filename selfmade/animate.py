@@ -2,7 +2,7 @@ from MBS_design import *
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-MBS.integrate(20.0, 0.001)
+MBS.integrate(5.0, 0.001)
 MBS.read_q()
 
 def animate(i):

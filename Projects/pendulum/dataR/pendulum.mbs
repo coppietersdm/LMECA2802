@@ -12,40 +12,6 @@
       </coordinates>
     </gravity>
     <baseBodyName>Body_0</baseBodyName>
-    <point>
-      <pointname>Point_0</pointname>
-      <coordinates>
-        <x>0.25</x>
-        <y>0.0</y>
-        <z>0.0</z>
-      </coordinates>
-      <graphics>
-        <x2D>
-          <position>
-            <x>687.0</x>
-            <y>191.0</y>
-          </position>
-        </x2D>
-        <x3D />
-      </graphics>
-    </point>
-    <point>
-      <pointname>Point_1</pointname>
-      <coordinates>
-        <x>-0.5</x>
-        <y>0.0</y>
-        <z>0.0</z>
-      </coordinates>
-      <graphics>
-        <x2D>
-          <position>
-            <x>216.0</x>
-            <y>195.0</y>
-          </position>
-        </x2D>
-        <x3D />
-      </graphics>
-    </point>
     <graphics>
       <x2D>
         <position>
@@ -104,15 +70,15 @@
       <joint>
         <jointname>R2_pendulum</jointname>
         <type>R2</type>
-        <nature>dependent</nature>
+        <nature>independent</nature>
         <initialvalue>
-          <q>0.3</q>
+          <q>1.0</q>
         </initialvalue>
         <graphics>
           <x2D>
             <position>
-              <x>484.0</x>
-              <y>387.0</y>
+              <x>480.0</x>
+              <y>404.0</y>
             </position>
           </x2D>
           <x3D>
@@ -121,87 +87,33 @@
           </x3D>
         </graphics>
       </joint>
-      <mass>5.0</mass>
+      <mass>1.0</mass>
       <com>
         <coordinates>
           <x>0.0</x>
           <y>0.0</y>
-          <z>-0.5</z>
+          <z>-1.0</z>
         </coordinates>
       </com>
       <inertia>
-        <Iyy>0.1</Iyy>
+        <Iyy>1.0</Iyy>
       </inertia>
       <point>
         <pointname>Point_0</pointname>
         <coordinates>
           <x>0.0</x>
           <y>0.0</y>
-          <z>-0.3</z>
+          <z>-2.0</z>
         </coordinates>
         <graphics>
           <x2D>
             <position>
-              <x>465.0</x>
-              <y>581.0</y>
+              <x>461.0</x>
+              <y>598.0</y>
             </position>
           </x2D>
           <x3D />
         </graphics>
-      </point>
-      <point>
-        <pointname>Point_1</pointname>
-        <coordinates>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>-0.25</z>
-        </coordinates>
-        <graphics>
-          <x2D>
-            <position>
-              <x>477.0</x>
-              <y>389.0</y>
-            </position>
-          </x2D>
-          <x3D />
-        </graphics>
-      </point>
-      <point>
-        <pointname>Point_2</pointname>
-        <coordinates>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>-1.5</z>
-        </coordinates>
-        <graphics>
-          <x2D>
-            <position>
-              <x>444.0</x>
-              <y>757.0</y>
-            </position>
-          </x2D>
-          <x3D />
-        </graphics>
-        <extforce name="LateralBumpstop" Pos="true" Rot="true" Vit="true" Om="true" Acc="true" Omp="true">
-          <x3D>
-            <force show="true" showCompX="true" showCompY="true" showCompZ="true" showResultant="true" drawPosition="end">
-              <x_color R="255" G="0" B="0" />
-              <y_color R="0" G="255" B="0" />
-              <z_color R="0" G="0" B="255" />
-              <resultant_color R="0" G="0" B="0" />
-              <diameter>0.05</diameter>
-              <scale>1.0</scale>
-            </force>
-            <torque showCompX="true" showCompY="true" showCompZ="true" showResultant="true" drawPosition="end">
-              <x_color R="255" G="0" B="0" />
-              <y_color R="0" G="255" B="0" />
-              <z_color R="0" G="0" B="255" />
-              <resultant_color R="0" G="0" B="0" />
-              <diameter>0.1</diameter>
-              <scale>1.0</scale>
-            </torque>
-          </x3D>
-        </extforce>
       </point>
       <graphics>
         <x2D>
@@ -272,28 +184,11 @@
       </graphics>
     </body>
     <body>
-      <bodyname>Slider</bodyname>
+      <bodyname>slider</bodyname>
       <parent>
         <bodyname>pendulum</bodyname>
         <pointname>Point_0</pointname>
       </parent>
-      <joint>
-        <jointname>R3_slider</jointname>
-        <type>R3</type>
-        <nature>dependent</nature>
-        <graphics>
-          <x2D>
-            <position>
-              <x>560.0</x>
-              <y>565.0</y>
-            </position>
-          </x2D>
-          <x3D>
-            <x3D_joint />
-            <x3D_frame />
-          </x3D>
-        </graphics>
-      </joint>
       <joint>
         <jointname>T3_slider</jointname>
         <type>T3</type>
@@ -301,8 +196,8 @@
         <graphics>
           <x2D>
             <position>
-              <x>632.0</x>
-              <y>626.0</y>
+              <x>536.0</x>
+              <y>641.0</y>
             </position>
           </x2D>
           <x3D>
@@ -311,12 +206,39 @@
           </x3D>
         </graphics>
       </joint>
-      <mass>2.0</mass>
+      <mass>1.0</mass>
+      <com>
+        <coordinates>
+          <x>0.0</x>
+          <y>0.0</y>
+          <z>-1.0</z>
+        </coordinates>
+      </com>
+      <inertia>
+        <Iyy>1.0</Iyy>
+      </inertia>
+      <point>
+        <pointname>Point_0</pointname>
+        <coordinates>
+          <x>0.0</x>
+          <y>0.0</y>
+          <z>0.0</z>
+        </coordinates>
+        <graphics>
+          <x2D>
+            <position>
+              <x>570.0</x>
+              <y>680.0</y>
+            </position>
+          </x2D>
+          <x3D />
+        </graphics>
+      </point>
       <graphics>
         <x2D>
           <position>
-            <x>15.0</x>
-            <y>17.0</y>
+            <x>22.0</x>
+            <y>18.0</y>
           </position>
           <name_pos>
             <x>0.0</x>
@@ -324,13 +246,13 @@
           </name_pos>
           <shape>circle</shape>
           <size>
-            <x>48.0</x>
-            <y>48.0</y>
+            <x>45.0</x>
+            <y>45.0</y>
           </size>
           <control_points>
             <control_point>
-              <x>63.0</x>
-              <y>17.0</y>
+              <x>67.0</x>
+              <y>18.0</y>
             </control_point>
           </control_points>
           <angle>0.0</angle>
@@ -339,53 +261,24 @@
           <x3D_com />
           <x3D_points />
           <x3D_lines />
-          <x3D_shapes>
-            <box>
-              <name>New_Shape</name>
-              <position>
-                <x>0.0</x>
-                <y>0.0</y>
-                <z>0.0</z>
-              </position>
-              <scale>
-                <x>1.0</x>
-                <y>1.0</y>
-                <z>1.0</z>
-              </scale>
-              <rotation>
-                <x>0.0</x>
-                <y>0.0</y>
-                <z>0.0</z>
-              </rotation>
-              <color R="0" G="0" B="0" />
-              <specularColor R="255" G="102" B="102" />
-              <shininess>250.0</shininess>
-              <transparency>0.0</transparency>
-              <size>
-                <x>0.1</x>
-                <y>0.1</y>
-                <z>0.1</z>
-              </size>
-            </box>
-          </x3D_shapes>
         </x3D>
       </graphics>
     </body>
     <body>
-      <bodyname>crank</bodyname>
+      <bodyname>pend2</bodyname>
       <parent>
-        <bodyname>base</bodyname>
-        <pointname>Point_1</pointname>
+        <bodyname>slider</bodyname>
+        <pointname>Point_0</pointname>
       </parent>
       <joint>
-        <jointname>R2_crank</jointname>
+        <jointname>Joint_0</jointname>
         <type>R2</type>
         <nature>independent</nature>
         <graphics>
           <x2D>
             <position>
-              <x>174.0</x>
-              <y>307.0</y>
+              <x>667.0</x>
+              <y>737.0</y>
             </position>
           </x2D>
           <x3D>
@@ -394,39 +287,22 @@
           </x3D>
         </graphics>
       </joint>
-      <mass>2.0</mass>
+      <mass>1.0</mass>
       <com>
         <coordinates>
           <x>0.0</x>
           <y>0.0</y>
-          <z>-0.075</z>
+          <z>-1.0</z>
         </coordinates>
       </com>
       <inertia>
-        <Iyy>0.1</Iyy>
+        <Iyy>1.0</Iyy>
       </inertia>
-      <point>
-        <pointname>Point_0</pointname>
-        <coordinates>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>-0.15</z>
-        </coordinates>
-        <graphics>
-          <x2D>
-            <position>
-              <x>175.0</x>
-              <y>412.0</y>
-            </position>
-          </x2D>
-          <x3D />
-        </graphics>
-      </point>
       <graphics>
         <x2D>
           <position>
-            <x>-17.0</x>
-            <y>-17.0</y>
+            <x>-31.0</x>
+            <y>-35.0</y>
           </position>
           <name_pos>
             <x>0.0</x>
@@ -434,124 +310,28 @@
           </name_pos>
           <shape>rectangle</shape>
           <size>
-            <x>48.0</x>
-            <y>140.0</y>
+            <x>51.0</x>
+            <y>90.0</y>
           </size>
           <control_points>
             <control_point>
-              <x>33.0</x>
-              <y>-17.0</y>
+              <x>20.0</x>
+              <y>-35.0</y>
             </control_point>
             <control_point>
-              <x>33.0</x>
-              <y>86.0</y>
+              <x>20.0</x>
+              <y>55.0</y>
             </control_point>
             <control_point>
-              <x>-17.0</x>
-              <y>86.0</y>
+              <x>-31.0</x>
+              <y>55.0</y>
             </control_point>
             <control_point>
-              <x>-17.0</x>
-              <y>-17.0</y>
+              <x>-31.0</x>
+              <y>-35.0</y>
             </control_point>
           </control_points>
           <angle>0.0</angle>
-        </x2D>
-        <x3D>
-          <x3D_com />
-          <x3D_points />
-          <x3D_lines />
-        </x3D>
-      </graphics>
-    </body>
-    <body>
-      <bodyname>rod</bodyname>
-      <parent>
-        <bodyname>crank</bodyname>
-        <pointname>Point_0</pointname>
-      </parent>
-      <joint>
-        <jointname>Joint_1</jointname>
-        <type>R2</type>
-        <nature>dependent</nature>
-        <initialvalue>
-          <q>-1.0</q>
-        </initialvalue>
-        <graphics>
-          <x2D>
-            <position>
-              <x>189.0</x>
-              <y>480.0</y>
-            </position>
-          </x2D>
-          <x3D>
-            <x3D_joint />
-            <x3D_frame />
-          </x3D>
-        </graphics>
-      </joint>
-      <mass>2.0</mass>
-      <com>
-        <coordinates>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>-0.29</z>
-        </coordinates>
-      </com>
-      <inertia>
-        <Iyy>0.1</Iyy>
-      </inertia>
-      <point>
-        <pointname>Point_0</pointname>
-        <coordinates>
-          <x>0.0</x>
-          <y>0.0</y>
-          <z>-0.58</z>
-        </coordinates>
-        <graphics>
-          <x2D>
-            <position>
-              <x>185.0</x>
-              <y>559.0</y>
-            </position>
-          </x2D>
-          <x3D />
-        </graphics>
-      </point>
-      <graphics>
-        <x2D>
-          <position>
-            <x>-30.0</x>
-            <y>-18.0</y>
-          </position>
-          <name_pos>
-            <x>0.0</x>
-            <y>0.0</y>
-          </name_pos>
-          <shape>rectangle</shape>
-          <size>
-            <x>61.0</x>
-            <y>109.0</y>
-          </size>
-          <control_points>
-            <control_point>
-              <x>31.0</x>
-              <y>-18.0</y>
-            </control_point>
-            <control_point>
-              <x>31.0</x>
-              <y>91.0</y>
-            </control_point>
-            <control_point>
-              <x>-30.0</x>
-              <y>91.0</y>
-            </control_point>
-            <control_point>
-              <x>-30.0</x>
-              <y>-18.0</y>
-            </control_point>
-          </control_points>
-          <angle>0.9093804491991414</angle>
         </x2D>
         <x3D>
           <x3D_com />
@@ -561,44 +341,6 @@
       </graphics>
     </body>
   </bodytree>
-  <cuts>
-    <!--this is the cut list-->
-    <ball>
-      <name>Firstcut</name>
-      <endpoint1>
-        <bodyname>rod</bodyname>
-        <pointname>Point_0</pointname>
-      </endpoint1>
-      <endpoint2>
-        <bodyname>pendulum</bodyname>
-        <pointname>Point_1</pointname>
-      </endpoint2>
-      <graphics>
-        <x3D>
-          <shown />
-        </x3D>
-      </graphics>
-    </ball>
-  </cuts>
-  <links>
-    <!--this is the link list-->
-    <link>
-      <name>MyLink</name>
-      <endpoint1>
-        <bodyname>base</bodyname>
-        <pointname>Point_0</pointname>
-      </endpoint1>
-      <endpoint2>
-        <bodyname>pendulum</bodyname>
-        <pointname>Point_1</pointname>
-      </endpoint2>
-      <graphics>
-        <x3D>
-          <shown />
-        </x3D>
-      </graphics>
-    </link>
-  </links>
   <user_models>
     <!--this is the userModel list-->
     <user_model>
