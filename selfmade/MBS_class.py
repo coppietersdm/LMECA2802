@@ -24,6 +24,10 @@ class mbs():
     def __init__(self):
         self.bodies = []
         self.base = body(None, "T1")
+        self.q = None
+    
+    def read_q(self):
+        self.q = np.loadtxt('dirdyn_q.res')
     
     def add_body(self, inbody, joint, m=0, I=0, dii=np.zeros(3), dhi = np.zeros(3), q0=np.zeros(3)):
         self.bodies.append(body(inbody, joint, m=m, I=I, dii=dii, dhi=dhi, q0=q0))
@@ -76,7 +80,6 @@ class mbs():
             for k in range(i.id):
                 i.Om[k] = R @  h.Om[k]  + ((k+1) == i.id)*i.phi
                 i.Am[k] = R @ (h.Am[k]  + tilde(h.Om[k])@i.dzhi) + ((k+1) == i.id)*i.psi
-          
           
     def backward_dynamics(self):
         # initialisation
@@ -141,7 +144,19 @@ class mbs():
         self.set_q(q + (k1+2*k2+2*k3+k4)*dt/6)
         self.set_qd(qd + (k1d+2*k2d+2*k3d+k4d)*dt/6)
         
-      
+    def integrate(self, t, dt):
+        y0 = np.array(list(self.get_q()) + list(self.get_qd()))
+        def derivative(y):
+            self.set_q(y[:len(self.bodies)])
+            self.set_qd(y[len(self.bodies):2*len(self.bodies)])
+            self.second_derivative()
+            return np.array(list(self.get_qd()) + list(self.get_qdd()))
+        
+        sol = solve_ivp(fun=lambda t,y: derivative(y), t_span=(0,t), y0=y0, t_eval=np.linspace(0,t,int(t/dt)))
+        self.q = sol.y[:len(self.bodies)].T
+        
+        np.savetxt('dirdyn_q.res', self.q)
+
 class body():
     N = 0
     def __init__(self, inbody, joint, m=0, I=np.zeros((3,3)), dii=np.zeros(3), dhi = np.zeros(3), q0=np.zeros(3)):
@@ -197,7 +212,6 @@ class body():
         self.Fext = np.zeros(3)
         self.Lext = np.zeros(3)
         
-    
     def compute_q_dependent_variables(self):        
         self.z          = self.q[0]*self.psi
         self.dzhi       = self.inbody.z + self.dhi
@@ -218,29 +232,3 @@ class body():
         for child in self.children:
             plt.plot([self.Oi_prime[0],child.Oi[0]],[self.Oi_prime[2],child.Oi[2]], 'k--')
         
-
-MBS = mbs()
-
-MBS.add_body(MBS.base,"R2", m=1, I=I2, dii=np.array([0,0,-1]), q0 = np.array([pi/2,0,0]))
-MBS.add_body(MBS.bodies[-1],"T3", m=1, I=I2, dii=np.array([0,0,-1]), dhi=np.array([0,0,-2]), q0=np.array([0.1,0,0]))
-MBS.add_body(MBS.bodies[-1],"R2", m=1, I=I2, dii=np.array([0,0,-1]), dhi=np.array([0,0,-2]))
-MBS.add_body(MBS.bodies[-1],"R2", m=1, I=I2, dii=np.array([0,0,-1]), dhi=np.array([0,0,-2]), q0=np.array([-0.5,0,0]))
-# MBS.add_body(MBS.bodies[-1],"R2", m=1, I=I2, dii=np.array([0,0,-1]), dhi=np.array([0,0,-2]))
-# MBS.add_body(MBS.bodies[-1],"T1", m=1, I=I2, dii=np.array([0,0,-1]), dhi=np.array([0,0,-2]))
-
-
-
-def animate(i):
-    # MBS.set_q([1*sin(i/10),3*cos(i/10)]) #,0.5*sin(i/5),-1-0.6*cos(i/5), 0.5*sin(i/10), 0.5*cos(i/10)])
-    for i in range(10):
-        MBS.update(0.001)
-    plt.cla()
-    MBS.plot()
-    plt.xlim(-10,10)
-    plt.ylim(-10,10)
-
-ani = FuncAnimation(plt.gcf(), animate, interval=10)
-plt.axis('equal')
-plt.show()
-
-print([x for x in map(lambda x:x.id, MBS.bodies)])
