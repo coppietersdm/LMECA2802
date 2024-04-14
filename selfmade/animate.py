@@ -2,11 +2,11 @@ from MBS_design import *
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-MBS.integrate(5.0, 0.001)
+MBS.integrate(20.0, 0.001)
 MBS.read_q()
 
 def animate(i):
-    MBS.set_q(MBS.q[i*100])
+    MBS.set_q(MBS.q[i*100][1:])
     plt.cla()
     MBS.plot()
     plt.xlim(-10,10)
