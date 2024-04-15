@@ -122,7 +122,7 @@ class mbs():
             self.set_qd(y[len(self.bodies):2*len(self.bodies)])
             self.second_derivative(t)
             return np.array(list(self.get_qd()) + list(self.get_qdd()))
-        self.t = np.linspace(0.0,t,int(t*1000+1))
+        self.t = np.round(np.arange(0.0,t+dt,dt),3)
         sol = solve_ivp(fun=lambda t,y: derivative(t,y), t_span=(0,t), y0=y0, t_eval=self.t, method = 'RK45')
         self.q = np.zeros((len(self.t), len(self.bodies)+1))
         self.q.T[1:] = sol.y[:len(self.bodies)]
