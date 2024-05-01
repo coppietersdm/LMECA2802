@@ -1,15 +1,15 @@
 from math import sin, cos, pi
 import numpy as np
-from scipy.integrate import solve_ivp
+from scipy.integrate import solve_ivp, odeint
 from matplotlib import pyplot as plt
 from scipy.spatial.transform import Rotation
 from matplotlib.animation import FuncAnimation
 
-e1 = np.array([1,0,0])
-e2 = np.array([0,1,0])
-e3 = np.array([0,0,1])
-zero = np.zeros(3)
-I2 = np.array([[0,0,0],[0,1,0],[0,0,0]])
+e1 = np.array([1.0,0.0,0.0])
+e2 = np.array([0.0,1.0,0.0])
+e3 = np.array([0.0,0,1.0])
+zero = np.array([0.0,0.0,0.0])
+I2 = np.array([[0.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,0.0]])
 
 g = np.array([0,0,-9.81])
 
@@ -23,19 +23,26 @@ def tilde(v):
 class mbs():
     def __init__(self):
         self.bodies = []
-        self.base = body(None, "T1")
+        self.base = body(None, "T1", anchor_points=[np.array([5.0,0.0,0.0]),np.array([-5.0,0.0,0.0])])
         self.q = None
         self.t = None
+        self.position_sensors = [(self.base,0),(self.base,1)]
     
     def read_q(self):
         self.q = np.loadtxt('dirdyn_q.res')
     
-    def add_body(self, inbody, joint, m=0, I=0, dii=np.zeros(3), dhi = np.zeros(3), q0=np.zeros(3), Q=lambda t,q,qd: 0):
-        self.bodies.append(body(inbody, joint, m=m, I=I, dii=dii, dhi=dhi, q0=q0, Q=Q))
-    
+    def add_body(self, inbody, joint, m=0.0, I=I2*0, dii=np.array([0.0,0.0,0.0]), dhi = np.array([0.0,0.0,0.0]), q0=np.array([0.0,0.0,0.0]), Q=lambda t,q,qd: 0.0, anchor_points = []):
+        self.bodies.append(body(inbody, joint, m=m, I=I, dii=dii, dhi=dhi, q0=q0, Q=Q, anchor_points=anchor_points))
+        for i in range(len(anchor_points)):
+            self.position_sensors.append((self.bodies[-1],i))
+        
     def compute_q_dependent_variables(self):
         for body in self.bodies:
             body.compute_q_dependent_variables()
+
+    def compute_q_and_qd_dependent_variables(self):
+        for body in self.bodies:
+            body.compute_q_and_qd_dependent_variables()
             
     def plot(self):
         self.compute_q_dependent_variables()
@@ -68,8 +75,8 @@ class mbs():
     def forward_kinematics(self):
         # initialisation
         for i in ([self.base] + self.bodies):
-            i.Om = np.zeros((len(self.bodies),3))
-            i.Am = np.zeros((len(self.bodies),3))
+            i.Om = np.array([[0.0,0.0,0.0]]*len(self.bodies))
+            i.Am = np.array([[0.0,0.0,0.0]]*len(self.bodies))
         
         for i in self.bodies:
             R = i.Rhi.T 
@@ -85,9 +92,9 @@ class mbs():
     def backward_dynamics(self):
         # initialisation
         for i in (self.bodies):
-            i.Wm = np.zeros((len(self.bodies),3))
-            i.Fm = np.zeros((len(self.bodies),3))
-            i.Lm = np.zeros((len(self.bodies),3))
+            i.Wm = np.array([[0.0,0.0,0.0]]*len(self.bodies))
+            i.Fm = np.array([[0.0,0.0,0.0]]*len(self.bodies))
+            i.Lm = np.array([[0.0,0.0,0.0]]*len(self.bodies))
             
         for i in reversed(self.bodies):
             i.Wc = i.m*(i.alpha_c + i.beta_c@i.dzii) - i.Fext
@@ -98,9 +105,50 @@ class mbs():
                 i.Fm[k] = sum(map(lambda j:j.Rhi @ j.Fm[k], i.children)) + i.Wm[k]
                 i.Lm[k] = sum(map(lambda j:j.Rhi @ j.Lm[k] + tilde(j.dzhi)@j.Rhi @ j.Fm[k], i.children)) + tilde(i.dzii)@i.Wm[k] + i.I@i.Om[k]
     
+    def spring(self, anchor_point1, anchor_point2, k, c):
+        body1 = self.position_sensors[anchor_point1][0]
+        x1 = body1.anchor_points[self.position_sensors[anchor_point1][1]]
+        Ox1 = body1.anchor_points_inertial_frame[self.position_sensors[anchor_point1][1]]
+        Odx1 = body1.anchor_points_speed_inertial_frame[self.position_sensors[anchor_point1][1]]
+        
+        body2 = self.position_sensors[anchor_point2][0]
+        x2 = body2.anchor_points[self.position_sensors[anchor_point2][1]]
+        Ox2 = body2.anchor_points_inertial_frame[self.position_sensors[anchor_point2][1]]
+        Odx2 = body2.anchor_points_speed_inertial_frame[self.position_sensors[anchor_point2][1]]
+        
+        body1.Fext += -body1.R0i.T @(1e6* (Ox1 - Ox2) + 1e4*(Odx1 - Odx2))
+        body2.Fext += -body2.R0i.T @(1e6* (Ox2 - Ox1) + 1e4*(Odx2 - Odx1))
+        
+        body1.Lext += tilde(x1-body1.dii)@body1.Fext
+        body2.Lext += tilde(x2-body2.dii)@body2.Fext
+        #print(x2, body2.Fext)
+    
+    def compute_external_forces(self,t):
+        for body in self.bodies:
+            body.Fext = np.array([0.0,0.0,0.0])
+            body.Lext = np.array([0.0,0.0,0.0])
+        self.spring(4,2,1e7,1e5)
+        self.spring(7,3,1e7,1e5)
+        
+        self.spring(0,4,1e7,1e5)
+        self.spring(1,7,1e7,1e5)
+        self.spring(5,6,1e7,1e5)
+        
+        pos_sens = self.position_sensors[5]
+        pos_sens[0].Fext += pos_sens[0].R0i.T @ np.array([50e3,0.0,0.0])*t/10
+        x2 = pos_sens[0].anchor_points[pos_sens[1]]
+        Ox2 = pos_sens[0].anchor_points_inertial_frame[pos_sens[1]]
+        pos_sens[0].Lext += tilde(x2-pos_sens[0].dii)@pos_sens[0].Fext
+        print(t, Ox2)
+        return
+        
+        
+    
     def second_derivative(self,t):
         self.compute_q_dependent_variables()
         self.forward_kinematics()
+        self.compute_q_and_qd_dependent_variables()
+        self.compute_external_forces(t)
         self.backward_dynamics()
 
         M = np.zeros((len(self.bodies),len(self.bodies)))
@@ -116,6 +164,7 @@ class mbs():
             body.q[2] = qdd[body.id-1]
             
     def integrate(self, t, dt):
+        #self.set_q([-2.213650355438758453e-03, -4.676378487554970602e-13, 2.202290395325861386e-14, -3.460804793491826007e-04, -2.307267597863204200e-04, 3.141938734069098960e+00, 2.307267597703354853e-04, 4.329388903198110761e+00, 2.499217396147539905e+00, 1.047185295753561896e+00, -1.732902912942253836e-04, -1.155381531077590327e-04, 3.141765913854898784e+00, 1.154827218620016818e-04, 4.329388903197891381e+00, -2.499217396147709103e+00, -1.047185295753369605e+00, -1.732602650194827365e-04, -1.154827217969535359e-04, 3.141765943881004386e+00, 1.155381530542919685e-04])
         y0 = np.array(list(self.get_q()) + list(self.get_qd()))
         def derivative(t,y):
             self.set_q(y[:len(self.bodies)])
@@ -123,6 +172,7 @@ class mbs():
             self.second_derivative(t)
             return np.array(list(self.get_qd()) + list(self.get_qdd()))
         self.t = np.round(np.arange(0.0,t+dt,dt),3)
+        
         sol = solve_ivp(fun=lambda t,y: derivative(t,y), t_span=(0,t), y0=y0, t_eval=self.t, method = 'RK45')
         self.q = np.zeros((len(self.t), len(self.bodies)+1))
         self.q.T[1:] = sol.y[:len(self.bodies)]
@@ -132,7 +182,7 @@ class mbs():
                 
 class body():
     N = 0
-    def __init__(self, inbody, joint, m=0.0, I=np.zeros((3,3), dtype=float), dii=np.zeros(3,dtype=float), dhi = np.zeros(3,dtype=float), q0=np.zeros(3,dtype=float), Q=lambda t,q,qd:0.0):
+    def __init__(self, inbody, joint, m=0.0, I=I2*0, dii=np.array([0.0,0.0,0.0]), dhi = np.array([0.0,0.0,0.0]), q0=np.array([0.0,0.0,0.0]), Q=lambda t,q,qd:0.0, anchor_points = []):
         # ---------------------------------------------------------------------------------------------
         # body constants
         # ---------------------------------------------------------------------------------------------
@@ -156,18 +206,24 @@ class body():
         # ---------------------------------------------------------------------------------------------
         self.q = q0
 
-        self.Oi, self.Oi_prime, self.Gi = (np.zeros(3),np.zeros(3),np.zeros(3))
-        self.R0i = np.eye(3, dtype=float)
-        self.z, self.dzhi, self.dzii = (np.zeros(3),np.zeros(3),np.zeros(3))
-        self.Rhi = np.eye(3, dtype=float)
+        self.Oi, self.Oi_prime, self.Gi = (np.array([0.0,0.0,0.0]),np.array([0.0,0.0,0.0]),np.array([0.0,0.0,0.0]))
+        self.R0i = np.array([[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]])
+        self.z, self.dzhi, self.dzii = (np.array([0.0,0.0,0.0]),np.array([0.0,0.0,0.0]),np.array([0.0,0.0,0.0]))
+        self.Rhi = np.array([[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0]])
+        
+        # ---------------------------------------------------------------------------------------------
+        # q and qd dependent variables
+        # ---------------------------------------------------------------------------------------------
+        self.Oid = np.array([0.0,0.0,0.0])
+        
         
         # ---------------------------------------------------------------------------------------------
         # kinematics
         # ---------------------------------------------------------------------------------------------
-        self.omega = np.zeros(3, dtype=float)
-        self.omegad_c = np.zeros(3, dtype=float)
+        self.omega = np.array([0.0,0.0,0.0])
+        self.omegad_c = np.array([0.0,0.0,0.0])
         self.alpha_c = -g
-        self.beta_c = np.zeros((3,3), dtype=float)
+        self.beta_c = np.array([0.0,0.0,0.0])
         
         self.Om = None
         self.Am = None
@@ -175,19 +231,25 @@ class body():
         # ---------------------------------------------------------------------------------------------
         # dynamics
         # ---------------------------------------------------------------------------------------------        
-        self.Wc = np.zeros(3, dtype=float)
-        self.Fc = np.zeros(3, dtype=float)
-        self.Lc = np.zeros(3, dtype=float)
+        self.Wc = np.array([0.0,0.0,0.0])
+        self.Fc = np.array([0.0,0.0,0.0])
+        self.Lc = np.array([0.0,0.0,0.0])
         
         self.Wm = None
         self.Fm = None
         self.Lm = None
          
         #external forces and torques
-        self.Fext = np.zeros(3, dtype=float)
-        self.Lext = np.zeros(3, dtype=float)
+        self.Fext = np.array([0.0,0.0,0.0])
+        self.Lext = np.array([0.0,0.0,0.0])
         
-    def compute_q_dependent_variables(self):        
+        #position sensors
+        self.anchor_points = anchor_points
+        self.anchor_points_inertial_frame = anchor_points
+        self.anchor_points_speed_inertial_frame = np.array(anchor_points)*0
+        
+        
+    def compute_q_dependent_variables(self):
         self.z          = self.q[0]*self.psi
         self.dzhi       = self.inbody.z + self.dhi
         self.dzii       = self.z + self.dii
@@ -197,7 +259,14 @@ class body():
         self.Oi         = self.inbody.Oi + self.inbody.R0i @ self.dzhi
         self.Oi_prime   = self.Oi + self.inbody.R0i @ self.z
         self.Gi         = self.Oi + self.R0i @ self.dzii
-    
+        
+        self.anchor_points_inertial_frame = list(map(lambda x: self.Oi + self.R0i @ x, self.anchor_points))
+
+        
+    def compute_q_and_qd_dependent_variables(self):
+        self.Oid = self.inbody.Oid + self.inbody.R0i@(tilde(self.inbody.omega)@self.dzhi + self.inbody.psi*self.inbody.q[1])
+        self.anchor_points_speed_inertial_frame = list(map(lambda x: self.Oid + self.R0i@tilde(self.omega)@x + self.psi*self.q[1], self.anchor_points))
+        
     def plot(self):
         plt.plot(self.Oi[0], self.Oi[2], 'bo')
         plt.plot(self.Oi_prime[0], self.Oi_prime[2], 'go')
@@ -206,4 +275,8 @@ class body():
         plt.plot([self.Oi_prime[0], self.Gi[0]], [self.Oi_prime[2], self.Gi[2]], 'k')
         for child in self.children:
             plt.plot([self.Oi_prime[0],child.Oi[0]],[self.Oi_prime[2],child.Oi[2]], 'k--')
+            
+        for anchor_point in self.anchor_points_inertial_frame:
+            plt.plot([self.Oi_prime[0],anchor_point[0]],[self.Oi_prime[2],anchor_point[2]], 'y--')
+            plt.plot(anchor_point[0],anchor_point[2], 'yo')
         
