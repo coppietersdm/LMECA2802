@@ -9,9 +9,9 @@ e1 = np.array([1.0,0.0,0.0])
 e2 = np.array([0.0,1.0,0.0])
 e3 = np.array([0.0,0,1.0])
 zero = np.array([0.0,0.0,0.0])
-I2 = np.array([[0.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,0.0]])
+I1 = np.array([[1.0,0.0,0.0],[0.0,0.0,0.0],[0.0,0.0,0.0]])
 
-g = np.array([0,0,-9.81])
+g = np.array([0,0,9.81])
 
 
 def Rmat(phi, theta):
@@ -23,15 +23,16 @@ def tilde(v):
 class mbs():
     def __init__(self):
         self.bodies = []
-        self.base = body(None, "T1", anchor_points=[np.array([5.0,0.0,0.0]),np.array([-5.0,0.0,0.0])])
+        self.base = body(None, "T1", anchor_points=[np.array([0.0,5.0,0.0]),np.array([0.0,-5.0,0.0])])
         self.q = None
         self.t = None
         self.position_sensors = [(self.base,0),(self.base,1)]
     
     def read_q(self):
         self.q = np.loadtxt('dirdyn_q.res')
+        self.qd = np.loadtxt('dirdyn_qd.res')
     
-    def add_body(self, inbody, joint, m=0.0, I=I2*0, dii=np.array([0.0,0.0,0.0]), dhi = np.array([0.0,0.0,0.0]), q0=np.array([0.0,0.0,0.0]), Q=lambda t,q,qd: 0.0, anchor_points = []):
+    def add_body(self, inbody, joint, m=0.0, I=I1*0, dii=np.array([0.0,0.0,0.0]), dhi = np.array([0.0,0.0,0.0]), q0=np.array([0.0,0.0,0.0]), Q=lambda t,q,qd: 0.0, anchor_points = []):
         self.bodies.append(body(inbody, joint, m=m, I=I, dii=dii, dhi=dhi, q0=q0, Q=Q, anchor_points=anchor_points))
         for i in range(len(anchor_points)):
             self.position_sensors.append((self.bodies[-1],i))
@@ -105,7 +106,7 @@ class mbs():
                 i.Fm[k] = sum(map(lambda j:j.Rhi @ j.Fm[k], i.children)) + i.Wm[k]
                 i.Lm[k] = sum(map(lambda j:j.Rhi @ j.Lm[k] + tilde(j.dzhi)@j.Rhi @ j.Fm[k], i.children)) + tilde(i.dzii)@i.Wm[k] + i.I@i.Om[k]
     
-    def spring(self, anchor_point1, anchor_point2, k, c):
+    def spring(self, anchor_point1, anchor_point2):
         body1 = self.position_sensors[anchor_point1][0]
         x1 = body1.anchor_points[self.position_sensors[anchor_point1][1]]
         Ox1 = body1.anchor_points_inertial_frame[self.position_sensors[anchor_point1][1]]
@@ -121,25 +122,28 @@ class mbs():
         
         body1.Lext += tilde(x1-body1.dii)@body1.Fext
         body2.Lext += tilde(x2-body2.dii)@body2.Fext
-        #print(x2, body2.Fext)
-    
+        return (1e6* (Ox1 - Ox2) + 1e4*(Odx1 - Odx2))
+        
+        #print(anchor_point1, Ox1, body1.Fext, anchor_point2, Ox2, body2.Fext)
+            
     def compute_external_forces(self,t):
+        #return
         for body in self.bodies:
             body.Fext = np.array([0.0,0.0,0.0])
             body.Lext = np.array([0.0,0.0,0.0])
-        self.spring(4,2,1e7,1e5)
-        self.spring(7,3,1e7,1e5)
+        self.spring(0,6)
+        self.spring(1,5)
         
-        self.spring(0,4,1e7,1e5)
-        self.spring(1,7,1e7,1e5)
-        self.spring(5,6,1e7,1e5)
+        self.spring(2,6)
+        self.spring(3,5)
+        self.spring(4,7)
         
-        pos_sens = self.position_sensors[5]
-        pos_sens[0].Fext += pos_sens[0].R0i.T @ np.array([50e3,0.0,0.0])*t/10
+        pos_sens = self.position_sensors[4]
+        pos_sens[0].Fext += pos_sens[0].R0i.T @ np.array([0.0,50.0e3,0.0])*t/10
         x2 = pos_sens[0].anchor_points[pos_sens[1]]
         Ox2 = pos_sens[0].anchor_points_inertial_frame[pos_sens[1]]
         pos_sens[0].Lext += tilde(x2-pos_sens[0].dii)@pos_sens[0].Fext
-        print(t, Ox2)
+        
         return
         
         
@@ -150,7 +154,7 @@ class mbs():
         self.compute_q_and_qd_dependent_variables()
         self.compute_external_forces(t)
         self.backward_dynamics()
-
+        print(t)
         M = np.zeros((len(self.bodies),len(self.bodies)))
         c = np.zeros(len(self.bodies))
         for i in self.bodies:
@@ -164,7 +168,8 @@ class mbs():
             body.q[2] = qdd[body.id-1]
             
     def integrate(self, t, dt):
-        #self.set_q([-2.213650355438758453e-03, -4.676378487554970602e-13, 2.202290395325861386e-14, -3.460804793491826007e-04, -2.307267597863204200e-04, 3.141938734069098960e+00, 2.307267597703354853e-04, 4.329388903198110761e+00, 2.499217396147539905e+00, 1.047185295753561896e+00, -1.732902912942253836e-04, -1.155381531077590327e-04, 3.141765913854898784e+00, 1.154827218620016818e-04, 4.329388903197891381e+00, -2.499217396147709103e+00, -1.047185295753369605e+00, -1.732602650194827365e-04, -1.154827217969535359e-04, 3.141765943881004386e+00, 1.155381530542919685e-04])
+        self.set_q([-1.307371e-018, 6.751184e-003,3.300868e-020,-3.461583e-004,-2.307754e-004,3.461583e-004,2.307754e-004,-2.499200e+000,-4.325782e+000,-1.047116e+000,-1.732811e-004,-1.154966e-004,1.733112e-004,1.155521e-004,2.499200e+000,-4.325782e+000,1.047116e+000,-1.733112e-004,-1.155521e-004,1.732811e-004,1.154966e-004])
+                #-6.859830273748188664e-11,6.749362711899755361e-03,5.427355196639784814e-11,-3.459512804736240301e-04,-2.306422284020904047e-04,3.459511583796465780e-04,2.306420615236282382e-04,-2.498752651942949043e+00,-4.325474904687514055e+00,-1.047130689806936577e+00,-2.420857075453938670e-04,-1.498900069372682137e-04,2.765287321827314426e-04,2.531544968427478339e-04,2.498752651603370900e+00,-4.325474904573034074e+00,1.047130689134800230e+00,-2.765284378653398581e-04,-2.531534616277833017e-04,2.420866527573357593e-04,1.498908495089531622e-04])
         y0 = np.array(list(self.get_q()) + list(self.get_qd()))
         def derivative(t,y):
             self.set_q(y[:len(self.bodies)])
@@ -173,16 +178,18 @@ class mbs():
             return np.array(list(self.get_qd()) + list(self.get_qdd()))
         self.t = np.round(np.arange(0.0,t+dt,dt),3)
         
-        sol = solve_ivp(fun=lambda t,y: derivative(t,y), t_span=(0,t), y0=y0, t_eval=self.t, method = 'RK45')
+        sol = solve_ivp(fun=lambda t,y: derivative(t,y), t_span=(0,t), y0=y0, t_eval=self.t, method = 'BDF')
         self.q = np.zeros((len(self.t), len(self.bodies)+1))
         self.q.T[1:] = sol.y[:len(self.bodies)]
         self.q.T[0] = self.t
+        self.qd = sol.y[len(self.bodies):2*len(self.bodies)]
         np.savetxt('dirdyn_q.res', self.q)
+        np.savetxt('dirdyn_qd.res', self.qd)
         
                 
 class body():
     N = 0
-    def __init__(self, inbody, joint, m=0.0, I=I2*0, dii=np.array([0.0,0.0,0.0]), dhi = np.array([0.0,0.0,0.0]), q0=np.array([0.0,0.0,0.0]), Q=lambda t,q,qd:0.0, anchor_points = []):
+    def __init__(self, inbody, joint, m=0.0, I=I1*0, dii=np.array([0.0,0.0,0.0]), dhi = np.array([0.0,0.0,0.0]), q0=np.array([0.0,0.0,0.0]), Q=lambda t,q,qd:0.0, anchor_points = []):
         # ---------------------------------------------------------------------------------------------
         # body constants
         # ---------------------------------------------------------------------------------------------
@@ -268,15 +275,15 @@ class body():
         self.anchor_points_speed_inertial_frame = list(map(lambda x: self.Oid + self.R0i@tilde(self.omega)@x + self.psi*self.q[1], self.anchor_points))
         
     def plot(self):
-        plt.plot(self.Oi[0], self.Oi[2], 'bo')
-        plt.plot(self.Oi_prime[0], self.Oi_prime[2], 'go')
-        plt.plot(self.Gi[0], self.Gi[2], 'ro')
-        plt.plot([self.Oi[0], self.Oi_prime[0]],[self.Oi[2], self.Oi_prime[2]], 'g')
-        plt.plot([self.Oi_prime[0], self.Gi[0]], [self.Oi_prime[2], self.Gi[2]], 'k')
+        plt.plot(self.Oi[1], -self.Oi[2], 'bo')
+        plt.plot(self.Oi_prime[1], -self.Oi_prime[2], 'go')
+        plt.plot(self.Gi[1], -self.Gi[2], 'ro')
+        plt.plot([self.Oi[1], self.Oi_prime[1]],[-self.Oi[2], -self.Oi_prime[2]], 'g')
+        plt.plot([self.Oi_prime[1], self.Gi[1]], [-self.Oi_prime[2], -self.Gi[2]], 'k')
         for child in self.children:
-            plt.plot([self.Oi_prime[0],child.Oi[0]],[self.Oi_prime[2],child.Oi[2]], 'k--')
+            plt.plot([self.Oi_prime[1],child.Oi[1]],[-self.Oi_prime[2],-child.Oi[2]], 'k--')
             
         for anchor_point in self.anchor_points_inertial_frame:
-            plt.plot([self.Oi_prime[0],anchor_point[0]],[self.Oi_prime[2],anchor_point[2]], 'y--')
-            plt.plot(anchor_point[0],anchor_point[2], 'yo')
+            plt.plot([self.Oi_prime[1],anchor_point[1]],[-self.Oi_prime[2],-anchor_point[2]], 'y--')
+            plt.plot(anchor_point[1],-anchor_point[2], 'yo')
         

@@ -1,6 +1,6 @@
 
 ##############################################################
-#	file7.gen 17/03/2024 23:10:39    errors
+#	file7.gen 01/05/2024 12:12:23    errors
 ##############################################################
 git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
 
@@ -23,7 +23,7 @@ git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
 
 
 	The symbolic equations have been generated 
-	in the directory: /usr/local/robotran/users/michiels/upload/
+	in the directory: /usr/local/robotran/users/MECA2802/upload/
 
 
  		*** Generation symbolique reussie ! ***
@@ -32,7 +32,7 @@ git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
 
 
 ##############################################################
-#	file4.gen 17/03/2024 23:10:39    errors
+#	file4.gen 01/05/2024 12:12:23    errors
 ##############################################################
 git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
 
@@ -41,16 +41,7 @@ git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
 
 
 ##############################################################
-#	file6.gen 17/03/2024 23:10:39    errors
-##############################################################
-git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
-
-
- ERROR : The link(1D or 3D) menus require the presence of link(s) (1D or 3D) in the MBS 
-
-
-##############################################################
-#	file3.gen 17/03/2024 23:10:39    errors
+#	file3.gen 01/05/2024 12:12:23    errors
 ##############################################################
 git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
 
@@ -59,16 +50,39 @@ git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
 
 
 ##############################################################
-#	file2.gen 17/03/2024 23:10:39    errors
+#	file0.gen 01/05/2024 12:12:23    errors
 ##############################################################
 git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
 
+	Computation of the kinematics........
 
- ERROR : The link(1D or 3D) menus require the presence of link(s) (1D or 3D) in the MBS 
+	Computation of the dynamics.....................
+
+		Joints   21  20  19  18  17  16  15  14  13  12
+
+		    -->  11  10   9   8   7   6   5   4   3   2
+
+		    -->   1
+
+	Elimination of the superfluous equations.....................
+
+
+		Maximum simultaneous symbolic expressions :  2809
+
+		Maximum number of allocated Kbytes :  131
+
+
+	The symbolic equations have been generated 
+	in the directory: /usr/local/robotran/users/MECA2802/upload/
+
+
+ 		*** Generation symbolique reussie ! ***
+
+
 
 
 ##############################################################
-#	file1.gen 17/03/2024 23:10:39    errors
+#	file1.gen 01/05/2024 12:12:23    errors
 ##############################################################
 git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
 
@@ -82,7 +96,7 @@ git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
 
 
 	The symbolic equations have been generated 
-	in the directory: /usr/local/robotran/users/michiels/upload/
+	in the directory: /usr/local/robotran/users/MECA2802/upload/
 
 
  		*** Generation symbolique reussie ! ***
@@ -91,7 +105,7 @@ git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
 
 
 ##############################################################
-#	file1b.gen 17/03/2024 23:10:39    errors
+#	file1b.gen 01/05/2024 12:12:23    errors
 ##############################################################
 git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
 
@@ -105,7 +119,7 @@ git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
 
 
 	The symbolic equations have been generated 
-	in the directory: /usr/local/robotran/users/michiels/upload/
+	in the directory: /usr/local/robotran/users/MECA2802/upload/
 
 
  		*** Generation symbolique reussie ! ***
