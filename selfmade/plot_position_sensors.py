@@ -31,11 +31,11 @@ for i in range(0,len(MBS.q),100):
     positions7.append(position_sensors7)
     t.append(MBS.q[i][0])
     
-    left_vert_force.append(MBS.spring(0,2)[2])
-    right_vert_force.append(MBS.spring(1,3)[2])
+    left_vert_force.append(MBS.spring(0,6)[2])
+    right_vert_force.append(MBS.spring(1,5)[2])
     
-    left_hor_force.append(MBS.spring(0,2)[1])
-    right_hor_force.append(MBS.spring(1,3)[1])
+    left_hor_force.append(MBS.spring(0,6)[1])
+    right_hor_force.append(MBS.spring(1,5)[1])
     
 positions4 = np.array(positions4)
 speeds4 = np.array(speeds4)
@@ -60,6 +60,7 @@ plt.legend()
 plt.xlabel('time [s]')
 plt.ylabel('force [N]')
 plt.savefig('vertForce.pdf')
+plt.show()
 
 plt.clf()
 
@@ -71,6 +72,7 @@ plt.legend()
 plt.xlabel('time [s]')
 plt.ylabel('force [N]')
 plt.savefig("horForce.pdf")
+plt.show()
 
 forces = [MBS.spring(0,6),MBS.spring(1,5),MBS.spring(2,6),MBS.spring(3,5),MBS.spring(4,7)]
 

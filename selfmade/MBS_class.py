@@ -106,7 +106,7 @@ class mbs():
                 i.Fm[k] = sum(map(lambda j:j.Rhi @ j.Fm[k], i.children)) + i.Wm[k]
                 i.Lm[k] = sum(map(lambda j:j.Rhi @ j.Lm[k] + tilde(j.dzhi)@j.Rhi @ j.Fm[k], i.children)) + tilde(i.dzii)@i.Wm[k] + i.I@i.Om[k]
     
-    def spring(self, anchor_point1, anchor_point2):
+    def spring(self, anchor_point1, anchor_point2, plot = False):
         body1 = self.position_sensors[anchor_point1][0]
         x1 = body1.anchor_points[self.position_sensors[anchor_point1][1]]
         Ox1 = body1.anchor_points_inertial_frame[self.position_sensors[anchor_point1][1]]
@@ -122,6 +122,9 @@ class mbs():
         
         body1.Lext += tilde(x1-body1.dii)@body1.Fext
         body2.Lext += tilde(x2-body2.dii)@body2.Fext
+        if(plot):
+            print('hello')
+            plt.plot([Ox1[1],Ox2[1]],[-Ox1[2],-Ox2[2]], 'r')
         return (1e6* (Ox1 - Ox2) + 1e4*(Odx1 - Odx2))
         
         #print(anchor_point1, Ox1, body1.Fext, anchor_point2, Ox2, body2.Fext)
