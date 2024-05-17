@@ -16,7 +16,7 @@ t = []
 
 for i in range(0,len(MBS.q),100):
     MBS.set_q(MBS.q[i][1:])
-    MBS.set_qd(MBS.qd.T[i])
+    MBS.set_qd(MBS.qd[i])
     MBS.compute_q_dependent_variables()
     MBS.forward_kinematics()
     MBS.compute_q_and_qd_dependent_variables()
@@ -50,7 +50,7 @@ plt.xlabel('time [s]')
 plt.ylabel('position [m]')
 plt.title("horizontal position of the top")
 plt.savefig('posTop.pdf')
-
+plt.show()
 plt.clf()
 
 plt.plot(t, left_vert_force, label = 'left') 

@@ -25,6 +25,8 @@ class mbs():
         self.bodies = []
         self.base = body(None, "T1", anchor_points=[np.array([0.0,5.0,0.0]),np.array([0.0,-5.0,0.0])])
         self.q = None
+        self.qd = None
+        self.qdd = None
         self.t = None
         self.position_sensors = [(self.base,0),(self.base,1)]
     
@@ -80,7 +82,7 @@ class mbs():
             i.Am = np.array([[0.0,0.0,0.0]]*len(self.bodies))
         
         for i in self.bodies:
-            R = i.Rhi.T 
+            R = i.Rhi.T
             h = i.inbody
             i.omega    = R @ h.omega    + i.phi*i.q[1]
             i.omegad_c = R @ h.omegad_c + tilde(i.omega)@i.phi*i.q[1]
@@ -106,7 +108,7 @@ class mbs():
                 i.Fm[k] = sum(map(lambda j:j.Rhi @ j.Fm[k], i.children)) + i.Wm[k]
                 i.Lm[k] = sum(map(lambda j:j.Rhi @ j.Lm[k] + tilde(j.dzhi)@j.Rhi @ j.Fm[k], i.children)) + tilde(i.dzii)@i.Wm[k] + i.I@i.Om[k]
     
-    def spring(self, anchor_point1, anchor_point2, plot = False):
+    def spring(self, anchor_point1, anchor_point2, plot = False, prt = False):
         body1 = self.position_sensors[anchor_point1][0]
         x1 = body1.anchor_points[self.position_sensors[anchor_point1][1]]
         Ox1 = body1.anchor_points_inertial_frame[self.position_sensors[anchor_point1][1]]
@@ -120,40 +122,42 @@ class mbs():
         body1.Fext += -body1.R0i.T @(1e6* (Ox1 - Ox2) + 1e4*(Odx1 - Odx2))
         body2.Fext += -body2.R0i.T @(1e6* (Ox2 - Ox1) + 1e4*(Odx2 - Odx1))
         
-        body1.Lext += tilde(x1-body1.dii)@body1.Fext
-        body2.Lext += tilde(x2-body2.dii)@body2.Fext
+        body1.Lext += -tilde(x1-body1.dii)@body1.R0i.T @(1e6* (Ox1 - Ox2) + 1e4*(Odx1 - Odx2))
+        body2.Lext += -tilde(x2-body2.dii)@body2.R0i.T @(1e6* (Ox2 - Ox1) + 1e4*(Odx2 - Odx1))
         if(plot):
-            print('hello')
             plt.plot([Ox1[1],Ox2[1]],[-Ox1[2],-Ox2[2]], 'r')
         return (1e6* (Ox1 - Ox2) + 1e4*(Odx1 - Odx2))
                     
-    def compute_external_forces(self,t):
+    def compute_external_forces(self,t, prt = False):
         #return
         for body in self.bodies:
             body.Fext = np.array([0.0,0.0,0.0])
             body.Lext = np.array([0.0,0.0,0.0])
-        self.spring(0,6)
-        self.spring(1,5)
+        self.spring(0,6,prt=prt)
+        self.spring(1,5,prt=prt)
         
-        self.spring(2,6)
-        self.spring(3,5)
-        self.spring(4,7)
+        self.spring(2,6,prt=prt)
+        self.spring(3,5,prt=prt)
+        self.spring(4,7,prt=prt)
+        if(prt):
+            for i, body in enumerate(self.bodies):
+                print(i, np.round(body.R0i @ body.Fext/1e6,2), np.round(body.R0i @ body.Lext/1e6,2))
         
         pos_sens = self.position_sensors[4]
         pos_sens[0].Fext += pos_sens[0].R0i.T @ np.array([0.0,50.0e3,0.0])*t/10
         x2 = pos_sens[0].anchor_points[pos_sens[1]]
         Ox2 = pos_sens[0].anchor_points_inertial_frame[pos_sens[1]]
-        pos_sens[0].Lext += tilde(x2-pos_sens[0].dii)@pos_sens[0].Fext
+        pos_sens[0].Lext += tilde(x2-pos_sens[0].dii)@pos_sens[0].R0i.T @ np.array([0.0,50.0e3,0.0])*t/10
         
         return
         
         
     
-    def second_derivative(self,t):
+    def second_derivative(self,t, prt = False):
         self.compute_q_dependent_variables()
         self.forward_kinematics()
         self.compute_q_and_qd_dependent_variables()
-        self.compute_external_forces(t)
+        self.compute_external_forces(t, prt = prt)
         self.backward_dynamics()
         print(t)
         M = np.zeros((len(self.bodies),len(self.bodies)))
@@ -169,22 +173,35 @@ class mbs():
             body.q[2] = qdd[body.id-1]
             
     def integrate(self, t, dt):
-        self.set_q([-0.000000e+00,0.000000e+00,0.000000e+00,0.000000e+00,0.000000e+00,0.000000e+00,0.000000e+00,0.000000e+00,-2.500000e+00,-4.330000e+00,-1.040000e+00,0.000000e+00,0.000000e+00,0.000000e+00,0.000000e+00,2.500000e+00,-4.330000e+00,1.040000e+00,0.000000e+00,0.000000e+00,0.000000e+00,0.000000e+00])
+        #self.set_q([8.561999e-017,6.751184e-003,4.314010e-018,-3.461583e-004,-2.307754e-004,3.461583e-004,2.307754e-004,-2.499200e+000,-4.325782e+000,-1.047116e+000,-1.732811e-004,-1.154966e-004,1.733112e-004,1.155521e-004,2.499200e+000,-4.325782e+000,1.047116e+000,-1.733112e-004,-1.155521e-004,1.732811e-004,1.154966e-004])
+        q = self.get_q()
+        # q[7] += 1.0
+        self.set_q(q)
         y0 = np.array(list(self.get_q()) + list(self.get_qd()))
-        def derivative(t,y):
+        def derivative(t,y, prt = False):
             self.set_q(y[:len(self.bodies)])
             self.set_qd(y[len(self.bodies):2*len(self.bodies)])
-            self.second_derivative(t)
+            self.second_derivative(t, prt = prt)
             return np.array(list(self.get_qd()) + list(self.get_qdd()))
         self.t = np.round(np.arange(0.0,t+dt,dt),4)
         
         sol = solve_ivp(fun=lambda t,y: derivative(t,y), t_span=(0,t), y0=y0, t_eval=self.t, method = 'BDF')
+        
         self.q = np.zeros((len(self.t), len(self.bodies)+1))
+        self.qd = np.zeros((len(self.t), len(self.bodies)+1))
+        self.qdd = np.zeros((len(self.t), len(self.bodies)+1))
+        
         self.q.T[1:] = sol.y[:len(self.bodies)]
+        self.qd.T[1:] = sol.y[len(self.bodies):2*len(self.bodies)]
+        self.qdd.T[1:] = np.array([derivative(t,y,prt = True)[len(self.bodies):] for y in sol.y.T[0:1]]).T
+        
         self.q.T[0] = self.t
-        self.qd = sol.y[len(self.bodies):2*len(self.bodies)]
-        np.savetxt('dirdyn_q.res', self.q)
-        np.savetxt('dirdyn_qd.res', self.qd)
+        self.qd.T[0] = self.t
+        self.qdd.T[0] = self.t
+        
+        np.savetxt('dirdyn_q.res', self.q,fmt='%.6e')
+        np.savetxt('dirdyn_qd.res', self.qd,fmt='%.6e')
+        np.savetxt('dirdyn_qdd.res', self.qdd,fmt='%.6e')
         
                 
 class body():
