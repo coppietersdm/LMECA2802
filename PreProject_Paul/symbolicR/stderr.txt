@@ -1,0 +1,87 @@
+
+##############################################################
+#	file7.gen 17/05/2024 11:25:44    errors
+##############################################################
+git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
+
+	Computation of the kinematics........
+
+	Computation of the dynamics....................
+
+		Joints   21  20  19  18  17  16  15  14  13  12
+
+		    -->  11  10   9   8   7   6   5   4   3   2
+
+		    -->   1
+
+	Elimination of the superfluous equations.....................
+
+
+		Maximum simultaneous symbolic expressions :  1458
+
+		Maximum number of allocated Kbytes :  68
+
+
+	The symbolic equations have been generated 
+	in the directory: /usr/local/robotran/users/MECA2802/upload/
+
+
+ 		*** Generation symbolique reussie ! ***
+
+
+
+
+##############################################################
+#	file0.gen 17/05/2024 11:25:44    errors
+##############################################################
+git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
+
+	Computation of the kinematics........
+
+	Computation of the dynamics.....................
+
+		Joints   21  20  19  18  17  16  15  14  13  12
+
+		    -->  11  10   9   8   7   6   5   4   3   2
+
+		    -->   1
+
+	Elimination of the superfluous equations.....................
+
+
+		Maximum simultaneous symbolic expressions :  2809
+
+		Maximum number of allocated Kbytes :  131
+
+
+	The symbolic equations have been generated 
+	in the directory: /usr/local/robotran/users/MECA2802/upload/
+
+
+ 		*** Generation symbolique reussie ! ***
+
+
+
+
+##############################################################
+#	file1b.gen 17/05/2024 11:25:44    errors
+##############################################################
+git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
+
+
+	Elimination of the superfluous equations.....................
+
+
+		Maximum simultaneous symbolic expressions :  2164
+
+		Maximum number of allocated Kbytes :  101
+
+
+	The symbolic equations have been generated 
+	in the directory: /usr/local/robotran/users/MECA2802/upload/
+
+
+ 		*** Generation symbolique reussie ! ***
+
+
+
