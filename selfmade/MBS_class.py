@@ -31,8 +31,8 @@ class mbs():
         self.position_sensors = [(self.base,0),(self.base,1)]
     
     def read_q(self):
-        self.q = np.loadtxt('dirdyn_q.res')
-        self.qd = np.loadtxt('dirdyn_qd.res')
+        self.q = np.loadtxt('/home/matthieu/Documents/LMECA2802/selfmade/dirdyn_q.res')
+        self.qd = np.loadtxt('/home/matthieu/Documents/LMECA2802/selfmade/dirdyn_qd.res')
     
     def add_body(self, inbody, joint, m=0.0, I=I1*0, dii=np.array([0.0,0.0,0.0]), dhi = np.array([0.0,0.0,0.0]), q0=np.array([0.0,0.0,0.0]), Q=lambda t,q,qd: 0.0, anchor_points = []):
         self.bodies.append(body(inbody, joint, m=m, I=I, dii=dii, dhi=dhi, q0=q0, Q=Q, anchor_points=anchor_points))
@@ -69,12 +69,6 @@ class mbs():
     def get_qdd(self):
         return np.array([body.q[2] for body in self.bodies])
 
-    def compute_barycentric_quantities(self):
-        for body in reversed(self.bodies):
-            body.m_bar = body.m + sum(map(lambda x:x.m_bar, body.children))
-            body.b = (body.m*body.dii + sum(map(lambda x:x.m_bar*x.dhi, body.children)))/body.m_bar
-            body.K = body.I - sum(map(lambda x:x.m_bar*tilde(x.dhi)@tilde(x.dhi),body.children))
-    
     def forward_kinematics(self):
         # initialisation
         for i in ([self.base] + self.bodies):
@@ -173,7 +167,7 @@ class mbs():
             body.q[2] = qdd[body.id-1]
             
     def integrate(self, t, dt):
-        #self.set_q([8.561999e-017,6.751184e-003,4.314010e-018,-3.461583e-004,-2.307754e-004,3.461583e-004,2.307754e-004,-2.499200e+000,-4.325782e+000,-1.047116e+000,-1.732811e-004,-1.154966e-004,1.733112e-004,1.155521e-004,2.499200e+000,-4.325782e+000,1.047116e+000,-1.733112e-004,-1.155521e-004,1.732811e-004,1.154966e-004])
+        self.set_q([9.276096e-18, 6.751184e-03, -7.835096e-20, -3.461583e-04, -2.307754e-04, 3.461583e-04, 2.307754e-04, -2.499200e+00, -4.325782e+00, -1.047116e+00, -1.732811e-04, -1.154966e-04, 1.733112e-04, 1.155521e-04, 2.499200e+00, -4.325782e+00, 1.047116e+00, -1.733112e-04, -1.155521e-04, 1.732811e-04, 1.154966e-04])
         q = self.get_q()
         # q[7] += 1.0
         self.set_q(q)
@@ -199,9 +193,9 @@ class mbs():
         self.qd.T[0] = self.t
         self.qdd.T[0] = self.t
         
-        np.savetxt('dirdyn_q.res', self.q,fmt='%.6e')
-        np.savetxt('dirdyn_qd.res', self.qd,fmt='%.6e')
-        np.savetxt('dirdyn_qdd.res', self.qdd,fmt='%.6e')
+        np.savetxt('/home/matthieu/Documents/LMECA2802/selfmade/dirdyn_q.res', self.q,fmt='%.6e')
+        np.savetxt('/home/matthieu/Documents/LMECA2802/selfmade/dirdyn_qd.res', self.qd,fmt='%.6e')
+        np.savetxt('/home/matthieu/Documents/LMECA2802/selfmade/dirdyn_qdd.res', self.qdd,fmt='%.6e')
         
                 
 class body():
@@ -239,7 +233,6 @@ class body():
         # q and qd dependent variables
         # ---------------------------------------------------------------------------------------------
         self.Oid = np.array([0.0,0.0,0.0])
-        
         
         # ---------------------------------------------------------------------------------------------
         # kinematics

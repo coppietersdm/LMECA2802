@@ -10,8 +10,8 @@ def animate(i):
     MBS.set_q(MBS.q[i*100][1:])
     plt.cla()
     MBS.plot()
-    plt.xlim(-0.2,0.2)
-    plt.ylim(8.5,8.7)
+    # plt.xlim(-0.2,0.2)
+    # plt.ylim(8.5,8.7)
 
 ani = FuncAnimation(plt.gcf(), animate, frames=len(MBS.q)//100, interval=1)
 
