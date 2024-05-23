@@ -1,0 +1,73 @@
+
+##############################################################
+#	file4.gen 23/05/2024 21:22:39    errors
+##############################################################
+git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
+
+
+ Warning (error_data): useless process for this multibody model !
+
+
+##############################################################
+#	file6.gen 23/05/2024 21:22:39    errors
+##############################################################
+git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
+
+
+ ERROR : The link(1D or 3D) menus require the presence of link(s) (1D or 3D) in the MBS 
+
+
+##############################################################
+#	file3.gen 23/05/2024 21:22:39    errors
+##############################################################
+git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
+
+
+ Warning (error_data): useless process for this multibody model !
+
+
+##############################################################
+#	file5.gen 23/05/2024 21:22:39    errors
+##############################################################
+git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
+
+
+	Elimination of the superfluous equations.....................
+
+
+		Maximum simultaneous symbolic expressions :  2148
+
+		Maximum number of allocated Kbytes :  100
+
+
+	The symbolic equations have been generated 
+	in the directory: /usr/local/robotran/users/michiels/upload/
+
+
+ 		*** Generation symbolique reussie ! ***
+
+
+
+
+##############################################################
+#	file1.gen 23/05/2024 21:22:39    errors
+##############################################################
+git hash : 8f46effdc05c898000a15b4c4dfc8f70efce4fc0
+
+
+	Elimination of the superfluous equations.....................
+
+
+		Maximum simultaneous symbolic expressions :  1397
+
+		Maximum number of allocated Kbytes :  65
+
+
+	The symbolic equations have been generated 
+	in the directory: /usr/local/robotran/users/michiels/upload/
+
+
+ 		*** Generation symbolique reussie ! ***
+
+
+
